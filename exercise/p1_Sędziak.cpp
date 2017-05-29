@@ -36,7 +36,7 @@ list::list() {
 
 void list::add_person(string first_name, string last_name, int age)
 {
-    person *sb_new = new person;
+    person *sb_new = new person; // stworzenie elementu
     
     sb_new->first_name = first_name;
     sb_new->last_name = last_name;
@@ -68,35 +68,39 @@ void list::show_list(int id)
     int j = 1;
     person *temp = first;
     
+    
     while (temp)
     {
+        //wyswietlaj póki temp nie jest nullem
+        //zaczynajac od wprowadzonego id-ka
         if (id <= j)
         {
             cout << "\n\tFirst name: " << temp->first_name <<
             "\n\tLast name: "<< temp->last_name <<
             "\n\tAge: " << temp->age<< endl;
         }
+        //nastepny element
         temp=temp->next;
         j++;
         
     }
-    if (j<id)
-        cout <<"\tPrzepraszam uzytkowniku, ale nie moge zaczac od " << id << " elementu.\n"<<
-               "\tMoja dlugosc to tylko " << j << ".\n";
-    else if (size == 0)
+    if (size == 0)
         cout << "\nNie moge wyswietlic, lista jest pusta.";
+    else if (size<id) //zprawdzenie w razie pustej lub za malej listy
+        cout <<"\n\tPrzepraszam uzytkowniku, ale nie moge zaczac od " << id << " elementu.\n"<<
+               "\tMoja dlugosc to tylko " << size << ".\n";
 }
 
 void list::delete_person(int id)
 {
-    if (id == 1)
+    if (id == 1) // dla pierwszego el.
     {
         //pierwszy el. wskazuje na 2 el.
         person *temp = first;
         first = temp->next;
     }
     
-    if (id>=2)
+    if (id>=2) // dla reszty el.
     {
         int i = 1;
         person *temp = first;
@@ -119,6 +123,7 @@ void list::delete_person(int id)
             temp->next = temp->next->next;
     }
     
+    // zmniejszenie licznika wielkosci listy i informacja gdyby byla pusta
     size--;
     if (size == 0)
     {
@@ -127,20 +132,25 @@ void list::delete_person(int id)
     }
 }
 
+//funkcja do kroku 4
 void list::special_peoples(char key)
 {
-    int counter = 0, id = 0;
+    int counter = 0;
     person *temp = first;
-    bool test = check(key, temp->last_name, temp->age);
+    //sprawdza czy element ma przedostatnia litere imienia
+    //taka jak wprowadzony char,
+    //czy wiek jest wiekszy niż 18
+    bool test = check(key, temp->first_name, temp->age);
 
+    //sprawdzenie pierwszego elementu
     if (test)
     {
-        person *sb_new = new person;
+        person *sb_new = new person; //nowy element
         first = sb_new;
         
         string first, last;
         int age;
-        cout<<"Podaj imie: ";
+        cout<<"\nPodaj imie: ";
         cin >> first;
         cout << "Podaj nazwisko: ";
         cin >> last;
@@ -153,20 +163,22 @@ void list::special_peoples(char key)
         sb_new->next = temp;
 
         counter++;
-        id++;
         size++;
     }
     
+    //sprawdzenie reszty elementow
     while(temp->next)
     {
         test = check(key, temp->next->last_name, temp->next->age);
+        
+        //stwórz do co 2 użytkownika o wieku>18..... i tak dalej
         if (counter%2 == 0 && test)
         {
             person *sb_new = new person;
             string first, last;
             int age;
             
-            cout<<"Podaj imie: ";
+            cout<<"\nPodaj imie: ";
             cin >> first;
             cout << "Podaj nazwisko: ";
             cin >> last;
@@ -177,6 +189,8 @@ void list::special_peoples(char key)
             sb_new->last_name = last;
             sb_new->age = age;
             
+            //przypisuje do nowego el. adres nastepnego
+            //oraz do bierzącego el., nowo stworzony el.
             sb_new->next = temp->next;
             temp->next = sb_new;
             size++;
@@ -188,6 +202,7 @@ void list::special_peoples(char key)
     }
 }
 
+//jak juz wspomnialem, sprawdza imie i wiek
 bool list::check(char key, string name, int age)
 {
     unsigned long pos = name.length() - 1;
@@ -209,7 +224,7 @@ int main() {
     
     for (int i=0; i<n; i++)
     {
-        cout<<"Podaj imie: ";
+        cout<<"\nPodaj imie: ";
         cin >> first;
         cout << "Podaj nazwisko: ";
         cin >> last;
@@ -228,23 +243,33 @@ int main() {
         cout << "Ktora osobe mam wymazac z listy? Zakres: <1," << base->size << ">\n";
         cin >> del;
     }while( del < 1 || del > base->size);
+    
     base->delete_person(del);
+    
+    //małe sprawdzenie zeby nie wyszly dziwne rzeczy
+    if(base->size == 0)
+    {
+        cout << "\n\n===Lista jest pusta, nie mam na czym pracowac.==="<<
+                "\n\tMuszę zakończyć to co zacząłem!";
+        return 0;
+    }
     
     //Krok4
     cout << "\nPodaj litere, po jakiej mam przeszukiwac imiona? ";
     cin >> key;
     base->special_peoples(key);
     
-    //Krok5 wyswietle cala liste dla zobaczenia efektu
+    //Krok5 wyswietle cala liste dla zobaczenia efektu, zostawiam zakomentowany losowy el.
     //random = (rand() % (base->size + 1));
+    //cout << "\nWyswietle liste zaczynajac od " << random << " elementu."<< endl;
     //base->show_list(random);
     base->show_list(1);
     
-    //Krok6
+    //Krok6 usuwanie listy stworzona funkcja
     for (int k = base->size ; k>0; k--)
         base->delete_person(1);
     
-    //tak dla pewnosci
+    //tak dla pewnosci sprawdzimy dlugosc
     base->show_list(1);
     return 0;
 }
