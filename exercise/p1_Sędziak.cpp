@@ -140,25 +140,50 @@ void list::special_peoples(char key)
     //sprawdza czy element ma przedostatnia litere imienia
     //taka jak wprowadzony char,
     //czy wiek jest wiekszy niż 18
-    bool test = check(key, temp->first_name, temp->age);
+    
+    string first_name, last_name;
+    int age;
+    cout<<"\nPodaj imie: ";
+    cin >> first_name;
+    cout << "Podaj nazwisko: ";
+    cin >> last_name;
+    //validacja wieku.
+    while(true)
+    {
+        cout << "Podaj wiek: ";
+        if(!(std::cin >> age))
+        {
+            if(!std::cin.fail()) // not a logic error
+            {
+                cout << "Wystapil blad." << endl;
+            }
+            
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            
+            cout << "Podales zle dane. Sprobuj ponownie." << endl;
+        }
+        else
+        {
+            auto isValidAge = (age >= 0 && age <= 150);
+            if(!isValidAge)
+                cout << "Podales zle dane. Sprobuj ponownie." << endl;
+            else
+                break;
+        }
+    }
+    
 
+    
     //sprawdzenie pierwszego elementu
+    bool test = check(key, temp->first_name, temp->age);
     if (test)
     {
         person *sb_new = new person; //nowy element
         first = sb_new;
         
-        string first, last;
-        int age;
-        cout<<"\nPodaj imie: ";
-        cin >> first;
-        cout << "Podaj nazwisko: ";
-        cin >> last;
-        cout << "Podaj wiek: ";
-        cin >> age;
-        
-        sb_new->first_name = first;
-        sb_new->last_name = last;
+        sb_new->first_name = first_name;
+        sb_new->last_name = last_name;
         sb_new->age = age;
         sb_new->next = temp;
 
@@ -175,18 +200,9 @@ void list::special_peoples(char key)
         if (counter%2 == 0 && test)
         {
             person *sb_new = new person;
-            string first, last;
-            int age;
             
-            cout<<"\nPodaj imie: ";
-            cin >> first;
-            cout << "Podaj nazwisko: ";
-            cin >> last;
-            cout << "Podaj wiek: ";
-            cin >> age;
-            
-            sb_new->first_name = first;
-            sb_new->last_name = last;
+            sb_new->first_name = first_name;
+            sb_new->last_name = last_name;
             sb_new->age = age;
             
             //przypisuje do nowego el. adres nastepnego
@@ -214,29 +230,86 @@ bool list::check(char key, string name, int age)
 }
 
 int main() {
-    string first, last;
-    int n, age, del;
+    string first_name, last_name, inStr;
+    int n = 1, age, del;
     char key;
+    list *base = new list;
+    
     //Krok1
     cout << "Podaj ilość osob które chcesz zapisać do listy:  ";
     cin >> n;
-    list *base = new list;
     
     for (int i=0; i<n; i++)
     {
-        cout<<"\nPodaj imie: ";
-        cin >> first;
+        cout << "\nPodaj imie: ";
+        cin >> first_name;
         cout << "Podaj nazwisko: ";
-        cin >> last;
-        cout << "Podaj wiek: ";
-        cin >> age;
-        base->add_person(first, last, age);
+        cin >> last_name;
+        
+        while(true)
+        {
+            cout << "Podaj wiek: ";
+            if(!(std::cin >> age))
+            {
+                if(!std::cin.fail()) // not a logic error
+                {
+                    std::cout << "Wystapil blad." << std::endl;
+                    return 1;
+                }
+                
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                
+                cout << "Podales zle dane. Sprobuj ponownie." << endl;
+            }
+            else
+            {
+                auto isValidAge = (age >= 0 && age <= 150);
+                if(!isValidAge)
+                    cout << "Podales zle dane. Sprobuj ponownie." << endl;
+                else
+                    break;
+            }
+        }
+        
+        base->add_person(first_name, last_name, age);
     }
     
     //Krok2 i 'jakiś' adres
     int random = (rand() % (base->size + 1));
     cout << "\nWyswietle liste zaczynajac od " << random << " elementu."<< endl;
     base->show_list(random);
+    
+    //Krok3 i validacja malej litery
+    while(1)
+    {
+        cout << "\nPodaj mala litere, po jakiej mam przeszukiwac imiona? ";
+        cin >> inStr;
+        
+        if(!std::cin.good())
+        {
+            cout << "Wystapil blad." << endl;
+            return 1;
+        }
+        
+        auto isChar = inStr.size() == 1;
+        if(!isChar)
+        {
+            cout << "Nie podales litery. Sprobuj ponownie." << endl;
+            continue;
+        }
+        
+        key = inStr[0];
+        auto isValidChar = std::isalpha(key) && std::islower(key);
+        if(!isValidChar)
+        {
+            cout << "Podales bledna litere. Sprobuj ponownie." << endl;
+            continue;
+        }
+        else
+            break;
+    }
+    base->special_peoples(key);
     
     //Krok4
     do{
@@ -253,11 +326,6 @@ int main() {
                 "\n\tMuszę zakończyć to co zacząłem!";
         return 0;
     }
-    
-    //Krok4
-    cout << "\nPodaj litere, po jakiej mam przeszukiwac imiona? ";
-    cin >> key;
-    base->special_peoples(key);
     
     //Krok5 wyswietle cala liste dla zobaczenia efektu, zostawiam zakomentowany losowy el.
     //random = (rand() % (base->size + 1));
